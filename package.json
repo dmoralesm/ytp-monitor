@@ -1,0 +1,17 @@
+{
+  "name": "ytp-monitor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David Morales",
+  "license": "ISC",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "nodemailer": "^6.4.4",
+    "puppeteer": "^2.1.1"
+  }
+}
