@@ -10,8 +10,11 @@
   "author": "David Morales",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.19.2",
+    "axios-cookiejar-support": "^0.5.1",
     "fs": "0.0.1-security",
     "nodemailer": "^6.4.4",
-    "puppeteer": "^2.1.1"
+    "querystring": "^0.2.0",
+    "tough-cookie": "^3.0.1"
   }
 }
