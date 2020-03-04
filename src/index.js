@@ -1,3 +1,4 @@
+const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 const axios = require('axios').default;
 const axiosCookieJarSupport = require('axios-cookiejar-support').default;
@@ -41,7 +42,7 @@ axiosCookieJarSupport(instance);
 // instance.defaults.jar = cookieJar;
 instance.defaults.jar = true;
 
-(async () => {
+const checkYtp = async () => {
   try {
     const loginPayload = {
       "uf8": "✓",
@@ -83,4 +84,11 @@ instance.defaults.jar = true;
   } catch (error) {
     console.error(error);
   }
-})();
+};
+
+checkYtp();
+
+cron.schedule('*/5 * * * *', () => {
+  console.log('running a task every 5 minutes');
+  checkYtp();
+});
