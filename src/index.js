@@ -46,8 +46,8 @@ const checkYtp = async () => {
   try {
     const loginPayload = {
       "uf8": "✓",
-      "sessions[email]": conf.email,
-      "sessions[password]": conf.password,
+      "sessions[email]": conf.ytp_login,
+      "sessions[password]": conf.ytp_password,
       "commit": "Iniciar Sesión"
     };
 
