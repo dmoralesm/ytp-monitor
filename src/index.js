@@ -89,6 +89,5 @@ const checkYtp = async () => {
 checkYtp();
 
 cron.schedule('*/5 * * * *', () => {
-  console.log('running a task every 5 minutes');
   checkYtp();
 });
