@@ -5,6 +5,7 @@ const axiosCookieJarSupport = require('axios-cookiejar-support').default;
 const tough = require('tough-cookie');
 const querystring = require('querystring');
 const fs = require('fs');
+const parse = require('node-html-parser').parse;
 
 const conf = require('./conf.json');
 
@@ -42,6 +43,33 @@ axiosCookieJarSupport(instance);
 // instance.defaults.jar = cookieJar;
 instance.defaults.jar = true;
 
+const createTable = (reqs) => {
+  let html = `
+  <table cellspacing="5">
+    <tr>
+      <th>Id</th>
+      <th>Calif</th>
+      <th>Rate</th>
+      <th>Amount</th>
+      <th>Term</th>
+    </tr>
+  `;
+  for (const req of reqs) {
+    const row = `
+    <tr>
+      <td>${req.id}</td>
+      <td>${req.calif}</td>
+      <td>${req.rate}</td>
+      <td>${req.amount}</td>
+      <td>${req.term}</td>
+    </tr>
+    `;
+    html += row;
+  }
+  html += '</table>';
+  return html;
+}
+
 const checkYtp = async () => {
   try {
     const loginPayload = {
@@ -55,31 +83,70 @@ const checkYtp = async () => {
       data: querystring.stringify(loginPayload),
     });
 
-    const inFunding = await instance.get('user/dashboard_widgets/in_funding');
-
-    // console.log(inFunding.data);
-
-    const exp = /<span>(\d+)<\/span>/i;
-    const match = inFunding.data.match(exp);
-    const reqCount = +match[1];
-
-    let prev = {};
+    let history = {};
     if (fs.existsSync(STORE_FILE)) {
       const storage = fs.readFileSync(STORE_FILE);
-      prev = JSON.parse(storage);
+      history = JSON.parse(storage);
     }
-    const prevReqCount = prev.reqCount || 0;
 
-    if (reqCount > prevReqCount) {
+    const prevReqCount = history.reqCount || 0;
+    const prevReqsHistory = history.reqsHistory || {};
+
+    const requisitionsListRequest = await instance.get('user/requisitions_listings');
+
+    // console.log(requisitionsListRequest.data);
+
+    const _root = parse(requisitionsListRequest.data);
+    const requisitionNodes = _root.querySelectorAll('tr.req-item');
+
+    const activeRequisitions = [];
+    const newReqsHistory = {};
+
+    for (const requisiton of requisitionNodes) {
+      const id = requisiton.querySelector('.id').removeWhitespace().rawText;
+      const calif = requisiton.querySelector('.calif').removeWhitespace().rawText;
+      const rate = requisiton.querySelector('.rate').removeWhitespace().rawText;
+      const amount = requisiton.querySelector('.amount').removeWhitespace().rawText;
+      const term = requisiton.querySelector('.term').removeWhitespace().rawText;
+      const isNew = !(prevReqsHistory[id]);
+
+      const reqObj = { calif, rate, amount, term };
+
+      if (isNew) {
+        newReqsHistory[id] = reqObj;
+      }
+
+      const reqObjWithNewFlag = { id, ...reqObj, new: isNew };
+      activeRequisitions.push(reqObjWithNewFlag);
+
+    }
+
+    const reqCount = activeRequisitions.length;
+    const newRequisitions = activeRequisitions.filter(r => r.new);
+    const newRequisitionsCount = newRequisitions.length;
+
+    const reqsWentToZero = prevReqCount > 0 && reqCount === 0;
+
+    if (newRequisitionsCount > 0 || reqsWentToZero) {
       console.log('Notify...');
-      const text = `There are ${reqCount} new requisitions.`;
+      let text = `There are ${reqCount} requisitions. ${newRequisitionsCount} new.\n`;
       console.log(text);
-      await transport.sendMail({...message, text});
+      const tableHtml = createTable(newRequisitions);
+      text += tableHtml;
+      await transport.sendMail({...message, html: text});
     } else {
       console.log('No new requisitions.');
     }
 
-    fs.writeFileSync(STORE_FILE, JSON.stringify({reqCount}));
+    history = {
+      reqCount,
+      reqsHistory: {
+        ...prevReqsHistory,
+        ...newReqsHistory
+      }
+    };
+
+    fs.writeFileSync(STORE_FILE, JSON.stringify(history, null, 1));
 
   } catch (error) {
     console.error(error);
