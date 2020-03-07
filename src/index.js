@@ -6,7 +6,6 @@ const tough = require('tough-cookie');
 const querystring = require('querystring');
 const fs = require('fs');
 const parse = require('node-html-parser').parse;
-const mock = require('./mock');
 
 const conf = require('./conf.json');
 
