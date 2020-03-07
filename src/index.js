@@ -55,7 +55,6 @@ const createTable = (reqs) => {
     </tr>
   `;
   for (const req of reqs) {
-    console.log(req);
     const row = `
     <tr>
       <td>${req.id}</td>
