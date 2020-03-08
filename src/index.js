@@ -125,9 +125,7 @@ const checkYtp = async () => {
     const newRequisitions = activeRequisitions.filter(r => r.new);
     const newRequisitionsCount = newRequisitions.length;
 
-    const reqsWentToZero = prevReqCount > 0 && reqCount === 0;
-
-    if (newRequisitionsCount > 0 || reqsWentToZero) {
+    if (newRequisitionsCount > 0) {
       console.log('Notify...');
       let text = `There are ${reqCount} requisitions. ${newRequisitionsCount} new.\n`;
       console.log(text);
@@ -135,7 +133,7 @@ const checkYtp = async () => {
       text += tableHtml;
       await transport.sendMail({...message, html: text});
     } else {
-      console.log('No new requisitions.');
+      console.log(`${reqCount} requisitions. No new requisitions.`);
     }
 
     history = {
