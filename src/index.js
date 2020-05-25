@@ -6,7 +6,6 @@ const tough = require('tough-cookie');
 const querystring = require('querystring');
 const fs = require('fs');
 const parse = require('node-html-parser').parse;
-const mock = require('./mock');
 
 const conf = require('./conf.json');
 
@@ -53,8 +52,6 @@ const createTable = (reqs) => {
       <th>Rate</th>
       <th>Amount</th>
       <th>Term</th>
-      <th>Missing</th>
-      <th>Progress</th>
     </tr>
   `;
   for (const req of reqs) {
@@ -65,8 +62,6 @@ const createTable = (reqs) => {
       <td>${req.rate}</td>
       <td>${req.amount}</td>
       <td>${req.term}</td>
-      <td>${req.missing}</td>
-      <td>${req.progress}%</td>
     </tr>
     `;
     html += row;
@@ -102,31 +97,20 @@ const checkYtp = async () => {
     // console.log(requisitionsListRequest.data);
 
     const _root = parse(requisitionsListRequest.data);
-    // const _root = parse(mock);
     const requisitionNodes = _root.querySelectorAll('tr.req-item');
 
     const activeRequisitions = [];
     const newReqsHistory = {};
 
     for (const requisiton of requisitionNodes) {
-      const missing = requisiton.childNodes[7].removeWhitespace().rawText;
-      const missingNumber = +missing.replace(/\D/g,'');
-
-      // Only process requisitions with a minimum to fund
-      if (missingNumber <= 200) {
-        break;
-      }
-
-      const id = requisiton.childNodes[0].removeWhitespace().rawText;
-      const calif = requisiton.childNodes[2].removeWhitespace().rawText;
-      const rate = requisiton.childNodes[3].removeWhitespace().rawText;
-      const amount = requisiton.childNodes[4].removeWhitespace().rawText;
-      const term = requisiton.childNodes[6].removeWhitespace().rawText;
-      const amountNumber = +amount.replace(/\D/g,'');
-
-      const progress = Math.floor(100 - (missingNumber / amountNumber * 100));
+      const id = requisiton.querySelector('.id').removeWhitespace().rawText;
+      const calif = requisiton.querySelector('.calif').removeWhitespace().rawText;
+      const rate = requisiton.querySelector('.rate').removeWhitespace().rawText;
+      const amount = requisiton.querySelector('.amount').removeWhitespace().rawText;
+      const term = requisiton.querySelector('.term').removeWhitespace().rawText;
       const isNew = !(prevReqsHistory[id]);
-      const reqObj = { calif, rate, amount, term, missing, progress };
+
+      const reqObj = { calif, rate, amount, term };
 
       if (isNew) {
         newReqsHistory[id] = reqObj;
