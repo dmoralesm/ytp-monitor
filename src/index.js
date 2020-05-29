@@ -75,19 +75,27 @@ const createTable = (reqs) => {
   return html;
 }
 
+const doLogin = async () => {
+  console.log('Trying to log in...');
+  const loginPayload = {
+    "uf8": "✓",
+    "sessions[email]": conf.ytp_login,
+    "sessions[password]": conf.ytp_password,
+    "commit": "Iniciar Sesión"
+  };
+  await instance.post('sign_in', {
+    data: querystring.stringify(loginPayload),
+  });
+}
+
+const userIsLoggedIn = async (_root) => {
+  const elementInPage = _root.querySelector('li.cart');
+  if (elementInPage) { return true; }
+  return false;
+}
+
 const checkYtp = async () => {
   try {
-    const loginPayload = {
-      "uf8": "✓",
-      "sessions[email]": conf.ytp_login,
-      "sessions[password]": conf.ytp_password,
-      "commit": "Iniciar Sesión"
-    };
-
-    const login = await instance.post('sign_in', {
-      data: querystring.stringify(loginPayload),
-    });
-
     let history = {};
     if (fs.existsSync(STORE_FILE)) {
       const storage = fs.readFileSync(STORE_FILE);
@@ -97,12 +105,18 @@ const checkYtp = async () => {
     const prevReqCount = history.reqCount || 0;
     const prevReqsHistory = history.reqsHistory || {};
 
-    const requisitionsListRequest = await instance.get('user/requisitions_listings');
+    let requisitionsListRequest = await instance.get('user/requisitions_listings');
+    let _root = parse(requisitionsListRequest.data);
 
-    // console.log(requisitionsListRequest.data);
+    const loggedIn = await userIsLoggedIn(_root);
 
-    const _root = parse(requisitionsListRequest.data);
-    // const _root = parse(mock);
+    if(!loggedIn) {
+      console.log('User is not logged in...');
+      await doLogin();
+      requisitionsListRequest = await instance.get('user/requisitions_listings');
+      _root = parse(requisitionsListRequest.data);
+    }
+
     const requisitionNodes = _root.querySelectorAll('tr.req-item');
 
     const activeRequisitions = [];
@@ -140,11 +154,11 @@ const checkYtp = async () => {
 
     if (newRequisitionsCount > 0) {
       console.log('Notify...');
-      let text = `There are ${reqCount} requisitions. ${newRequisitionsCount} new.\n`;
+      const text = `There are ${reqCount} requisitions. ${newRequisitionsCount} new.\n`;
       console.log(text);
       const tableHtml = createTable(newRequisitions);
-      text += tableHtml;
-      await transport.sendMail({...message, html: text});
+      const body = text + tableHtml;
+      await transport.sendMail({...message, text: text, html: body});
     } else {
       console.log(`${reqCount} requisitions. No new requisitions.`);
     }
@@ -166,6 +180,6 @@ const checkYtp = async () => {
 
 checkYtp();
 
-cron.schedule('*/5 * * * *', () => {
+cron.schedule('*/15 * * * * *', () => {
   checkYtp();
 });
