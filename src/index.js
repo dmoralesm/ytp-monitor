@@ -12,6 +12,7 @@ const conf = require('./conf.json');
 const STORE_FILE = 'src/storage.json';
 
 const cookieJar = new tough.CookieJar();
+const mock = require('./mock');
 
 const transport = nodemailer.createTransport({
   host: conf.smtp_host,
@@ -23,9 +24,9 @@ const transport = nodemailer.createTransport({
 });
 
 const message = {
-  from: conf.smtp_user,
+  from: `"YTP monitor" <${conf.smtp_user}>`,
   bcc: conf.to_email,
-  subject: 'YTP - New requisitions',
+  subject: 'New requisitions',
   text: ''
 };
 
@@ -52,6 +53,8 @@ const createTable = (reqs) => {
       <th>Rate</th>
       <th>Amount</th>
       <th>Term</th>
+      <th>Missing</th>
+      <th>Progress</th>
     </tr>
   `;
   for (const req of reqs) {
@@ -62,6 +65,8 @@ const createTable = (reqs) => {
       <td>${req.rate}</td>
       <td>${req.amount}</td>
       <td>${req.term}</td>
+      <td>${req.missing}</td>
+      <td>${req.progress}</td>
     </tr>
     `;
     html += row;
@@ -97,20 +102,28 @@ const checkYtp = async () => {
     // console.log(requisitionsListRequest.data);
 
     const _root = parse(requisitionsListRequest.data);
+    // const _root = parse(mock);
     const requisitionNodes = _root.querySelectorAll('tr.req-item');
 
     const activeRequisitions = [];
     const newReqsHistory = {};
 
     for (const requisiton of requisitionNodes) {
+
+      const missing = requisiton.querySelectorAll('td')[7].removeWhitespace().rawText;
+      const missingNumber = +missing.replace(/\D/g,'');
+
       const id = requisiton.querySelector('.id').removeWhitespace().rawText;
       const calif = requisiton.querySelector('.calif').removeWhitespace().rawText;
       const rate = requisiton.querySelector('.rate').removeWhitespace().rawText;
       const amount = requisiton.querySelector('.amount').removeWhitespace().rawText;
       const term = requisiton.querySelector('.term').removeWhitespace().rawText;
-      const isNew = !(prevReqsHistory[id]);
 
-      const reqObj = { calif, rate, amount, term };
+      const amountNumber = +amount.replace(/\D/g,'');
+
+      const progress = Math.floor(100 - (missingNumber / amountNumber * 100));
+      const isNew = !(prevReqsHistory[id]);
+      const reqObj = { id, calif, rate, amount, term, missing, progress: `${progress}%` };
 
       if (isNew) {
         newReqsHistory[id] = reqObj;
