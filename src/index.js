@@ -26,7 +26,7 @@ const transport = nodemailer.createTransport({
 const message = {
   from: `"YTP monitor" <${conf.smtp_user}>`,
   bcc: conf.to_email,
-  subject: 'New requisitions',
+  subject: 'New loan requisitions',
   text: ''
 };
 
@@ -49,11 +49,11 @@ const createTable = (reqs) => {
   <table cellspacing="5">
     <tr>
       <th>Id</th>
-      <th>Calif</th>
+      <th>Qualification</th>
       <th>Rate</th>
       <th>Amount</th>
       <th>Term</th>
-      <th>Missing</th>
+      <th>Remain</th>
       <th>Progress</th>
     </tr>
   `;
@@ -61,11 +61,11 @@ const createTable = (reqs) => {
     const row = `
     <tr>
       <td>${req.id}</td>
-      <td>${req.calif}</td>
+      <td>${req.qualification}</td>
       <td>${req.rate}</td>
       <td>${req.amount}</td>
       <td>${req.term}</td>
-      <td>${req.missing}</td>
+      <td>${req.remain}</td>
       <td>${req.progress}</td>
     </tr>
     `;
@@ -110,20 +110,20 @@ const checkYtp = async () => {
 
     for (const requisiton of requisitionNodes) {
 
-      const missing = requisiton.querySelectorAll('td')[7].removeWhitespace().rawText;
-      const missingNumber = +missing.replace(/\D/g,'');
+      const remain = requisiton.querySelectorAll('td')[7].removeWhitespace().rawText;
+      const remainNumber = +remain.replace(/\D/g,'');
 
       const id = requisiton.querySelector('.id').removeWhitespace().rawText;
-      const calif = requisiton.querySelector('.calif').removeWhitespace().rawText;
+      const qualification = requisiton.querySelector('.calif').removeWhitespace().rawText;
       const rate = requisiton.querySelector('.rate').removeWhitespace().rawText;
       const amount = requisiton.querySelector('.amount').removeWhitespace().rawText;
       const term = requisiton.querySelector('.term').removeWhitespace().rawText;
 
       const amountNumber = +amount.replace(/\D/g,'');
 
-      const progress = Math.floor(100 - (missingNumber / amountNumber * 100));
+      const progress = Math.floor(100 - (remainNumber / amountNumber * 100));
       const isNew = !(prevReqsHistory[id]);
-      const reqObj = { id, calif, rate, amount, term, missing, progress: `${progress}%` };
+      const reqObj = { id, qualification, rate, amount, term, remain, progress: `${progress}%` };
 
       if (isNew) {
         newReqsHistory[id] = reqObj;
