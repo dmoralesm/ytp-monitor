@@ -1,5 +1,7 @@
 FROM node:10-alpine
 
+RUN apk add tzdata
+
 WORKDIR /app
 
 COPY package*.json ./
