@@ -117,10 +117,6 @@ const checkYtp = async () => {
       _root = parse(requisitionsListRequest.data);
     }
 
-    const requisitionListContainer = _root.querySelector('#requisitions-list');
-    if (!requisitionListContainer) {
-      console.log('-> requisitionListContainer NOT FOUND')
-    }
 
     const requisitionNodes = _root.querySelectorAll('tr.req-item');
 
