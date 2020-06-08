@@ -6,6 +6,7 @@ const fs = require('fs');
 
 const conf = require('./conf.json');
 const { BASE_URL, SIGN_IN, REQ_LISTING} = require('./constants');
+const { formatNumber } = require('./helpers');
 
 const STORE_FILE = 'src/storage.json';
 
@@ -45,7 +46,7 @@ const createTable = (reqs) => {
   <table cellspacing="5">
     <tr>
       <th>Id</th>
-      <th>Qualification</th>
+      <th>Qual.</th>
       <th>Rate</th>
       <th>Amount</th>
       <th>Term</th>
@@ -58,11 +59,11 @@ const createTable = (reqs) => {
     <tr>
       <td>${req.id}</td>
       <td>${req.qualification}</td>
-      <td>${req.rate}</td>
-      <td>${req.amount}</td>
+      <td>${req.rate}%</td>
+      <td>${formatNumber(req.amount)}</td>
       <td>${req.term}</td>
-      <td>${req.remain}</td>
-      <td>${req.progress}</td>
+      <td>${formatNumber(req.remain)}</td>
+      <td>${req.progress}%</td>
     </tr>
     `;
     html += row;
