@@ -1,18 +1,22 @@
 const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 const axios = require('axios').default;
-const axiosCookieJarSupport = require('axios-cookiejar-support').default;
-const tough = require('tough-cookie');
 const querystring = require('querystring');
 const fs = require('fs');
-const parse = require('node-html-parser').parse;
 
 const conf = require('./conf.json');
+const { BASE_URL, SIGN_IN, REQ_LISTING} = require('./constants');
+
+console.log({
+   BASE_URL,
+  SIGN_IN,
+  REQ_LISTING
+});
 
 const STORE_FILE = 'src/storage.json';
 
-const cookieJar = new tough.CookieJar();
-const mock = require('./mock');
+// const mock = require('./mock');
+// const mockApi = require('./mock.json');
 
 const transport = nodemailer.createTransport({
   host: conf.smtp_host,
@@ -32,17 +36,15 @@ const message = {
 
 const instance = axios.create({
   withCredentials: true,
-  baseURL: 'https://www.yotepresto.com/',
+  baseURL: BASE_URL,
   headers: {
     'Accept': '*/*;q=0.5, text/javascript, application/javascript, application/ecmascript, application/x-ecmascript',
-    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.122 Safari/537.36'
   },
 });
 
-axiosCookieJarSupport(instance);
-// instance.defaults.jar = cookieJar;
-instance.defaults.jar = true;
+let ytp_client = null;
+let ytp_accessToken = null;
 
 const createTable = (reqs) => {
   let html = `
@@ -76,22 +78,28 @@ const createTable = (reqs) => {
 }
 
 const doLogin = async () => {
-  console.log('Trying to log in...');
-  const loginPayload = {
-    "uf8": "✓",
-    "sessions[email]": conf.ytp_login,
-    "sessions[password]": conf.ytp_password,
-    "commit": "Iniciar Sesión"
-  };
-  await instance.post('sign_in', {
-    data: querystring.stringify(loginPayload),
-  });
-}
+  try {
+    console.log('Trying to log in...');
+    const loginInfo = {
+      "email": conf.ytp_login,
+      "password": conf.ytp_password,
+    };
+    const loginPayload = querystring.stringify(loginInfo);
 
-const userIsLoggedIn = async (_root) => {
-  const elementInPage = _root.querySelector('li.cart');
-  if (elementInPage) { return true; }
-  return false;
+    const login = await instance.post(SIGN_IN, loginPayload, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' }
+    });
+
+    ytp_client = login.headers['client'];
+    ytp_accessToken = login.headers['access-token'];
+
+  } catch(error) {
+    console.log("Error", error.response.status, error.response.statusText);
+    if (error.response.data) {
+      console.log("Login error response:", error.response.data);
+    }
+
+  }
 }
 
 const checkYtp = async () => {
@@ -105,40 +113,32 @@ const checkYtp = async () => {
     const prevReqCount = history.reqCount || 0;
     const prevReqsHistory = history.reqsHistory || {};
 
-    let requisitionsListRequest = await instance.get('user/requisitions_listings');
-    let _root = parse(requisitionsListRequest.data);
+    let requisitionsListRequest = await instance.get(REQ_LISTING, {
+      headers: {
+        "uid": conf.ytp_login,
+        "client": ytp_client,
+        "token-type": "Bearer",
+        "access-token": ytp_accessToken,
+      }
+    });
 
-    const loggedIn = await userIsLoggedIn(_root);
-
-    if(!loggedIn) {
-      console.log('User is not logged in...');
-      await doLogin();
-      requisitionsListRequest = await instance.get('user/requisitions_listings');
-      _root = parse(requisitionsListRequest.data);
-    }
-
-
-    const requisitionNodes = _root.querySelectorAll('tr.req-item');
+    const requisitionNodes = requisitionsListRequest.data.requisitions;
+    // const requisitionNodes = mockApi.requisitions;
 
     const activeRequisitions = [];
     const newReqsHistory = {};
 
     for (const requisiton of requisitionNodes) {
+      const remain = requisiton.loan_detail.missing_amount;
+      const id = requisiton.id;
+      const qualification = requisiton.qualification;
+      const rate = requisiton.rate;
+      const amount = requisiton.approved_amount;
+      const term = requisiton.term;
 
-      const remain = requisiton.querySelectorAll('td')[7].removeWhitespace().rawText;
-      const remainNumber = +remain.replace(/\D/g,'');
-
-      const id = requisiton.querySelector('.id').removeWhitespace().rawText;
-      const qualification = requisiton.querySelector('.calif').removeWhitespace().rawText;
-      const rate = requisiton.querySelector('.rate').removeWhitespace().rawText;
-      const amount = requisiton.querySelector('.amount').removeWhitespace().rawText;
-      const term = requisiton.querySelector('.term').removeWhitespace().rawText;
-
-      const amountNumber = +amount.replace(/\D/g,'');
-
-      const progress = Math.floor(100 - (remainNumber / amountNumber * 100));
+      const progress = Math.floor(100 - (remain / amount * 100));
       const isNew = !(prevReqsHistory[id]);
-      const reqObj = { id, qualification, rate, amount, term, remain, progress: `${progress}%` };
+      const reqObj = { id, qualification, rate, amount, term, remain, progress };
 
       if (isNew) {
         newReqsHistory[id] = reqObj;
@@ -146,7 +146,6 @@ const checkYtp = async () => {
 
       const reqObjWithNewFlag = { id, ...reqObj, new: isNew };
       activeRequisitions.push(reqObjWithNewFlag);
-
     }
 
     const reqCount = activeRequisitions.length;
@@ -175,11 +174,18 @@ const checkYtp = async () => {
     fs.writeFileSync(STORE_FILE, JSON.stringify(history, null, 1));
 
   } catch (error) {
-    console.error(error);
+    console.log("Error", error.response.status, error.response.statusText);
+    if (error.response.data && error.response.data.errors.includes('No Autenticado')) {
+      doLogin();
+    }
   }
 };
 
-checkYtp();
+(async function start(){
+  await doLogin();
+  await checkYtp();
+})();
+
 
 cron.schedule('*/15 * * * * *', () => {
   checkYtp();

@@ -1,0 +1,23 @@
+{
+  "requisitions":[
+    {
+      "id":1122962,
+      "zell_app_id":"1309994",
+      "qualification":"B7",
+      "rate":"21.9",
+      "destination":"Negocio",
+      "term":36,
+      "approved_amount":"150000.0",
+      "loan_detail":{
+        "missing_amount":"68400.00",
+        "days_to_end":"25"
+      },
+      "funded_amount":0,
+      "hidden":false,
+      "credit_report":{
+        "score":677,
+        "history_antiquity":14
+      }
+    }
+  ]
+}
