@@ -5,7 +5,7 @@ const querystring = require('querystring');
 const fs = require('fs');
 
 const conf = require('./conf.json');
-const { BASE_URL, SIGN_IN, REQ_LISTING} = require('./constants');
+const { BASE_URL, SIGN_IN, REQ_LISTING, NOT_LOGGED } = require('./constants');
 const { formatNumber } = require('./helpers');
 
 const STORE_FILE = 'src/storage.json';
@@ -170,7 +170,7 @@ const checkYtp = async () => {
 
   } catch (error) {
     console.log("Error", error.response.status, error.response.statusText);
-    if (error.response.data && error.response.data.errors.includes('No Autenticado')) {
+    if (error.response.data && error.response.data.errors.includes(NOT_LOGGED)) {
       doLogin();
     }
   }
