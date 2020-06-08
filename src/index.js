@@ -171,16 +171,13 @@ const checkYtp = async () => {
   } catch (error) {
     console.log("Error", error.response.status, error.response.statusText);
     if (error.response.data && error.response.data.errors.includes(NOT_LOGGED)) {
+      console.log("Error response:", error.response.data);
       doLogin();
     }
   }
 };
 
-(async function start(){
-  await doLogin();
-  await checkYtp();
-})();
-
+checkYtp();
 
 cron.schedule('*/15 * * * * *', () => {
   checkYtp();
