@@ -7,12 +7,6 @@ const fs = require('fs');
 const conf = require('./conf.json');
 const { BASE_URL, SIGN_IN, REQ_LISTING} = require('./constants');
 
-console.log({
-   BASE_URL,
-  SIGN_IN,
-  REQ_LISTING
-});
-
 const STORE_FILE = 'src/storage.json';
 
 // const mock = require('./mock');
