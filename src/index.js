@@ -60,9 +60,9 @@ const createTable = (reqs) => {
       <td>${req.id}</td>
       <td>${req.qualification}</td>
       <td>${req.rate}%</td>
-      <td>${formatNumber(req.amount)}</td>
+      <td>$${formatNumber(req.amount)}</td>
       <td>${req.term}</td>
-      <td>${formatNumber(req.remain)}</td>
+      <td>$${formatNumber(req.remain)}</td>
       <td>${req.progress}%</td>
     </tr>
     `;
