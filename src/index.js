@@ -5,9 +5,8 @@ const querystring = require('querystring');
 const fs = require('fs');
 
 const conf = require('./conf.json');
-const { BASE_URL, SIGN_IN, REQ_LISTING, NOT_LOGGED } = require('./constants');
+const { BASE_URL, SIGN_IN, REQ_LISTING, NOT_LOGGED, MIN_LOAN } = require('./constants');
 const { formatNumber } = require('./helpers');
-
 const STORE_FILE = 'src/storage.json';
 
 // const mock = require('./mock');
@@ -144,7 +143,8 @@ const checkYtp = async () => {
     }
 
     const reqCount = activeRequisitions.length;
-    const newRequisitions = activeRequisitions.filter(r => r.new);
+    const reqsFilter = r => r.new && r.remain >= MIN_LOAN;
+    const newRequisitions = activeRequisitions.filter(reqsFilter);
     const newRequisitionsCount = newRequisitions.length;
 
     if (newRequisitionsCount > 0) {
