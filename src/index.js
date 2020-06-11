@@ -11,7 +11,7 @@ const { formatNumber } = require('./helpers');
 const STORE_FILE = 'src/storage.json';
 
 // const mock = require('./mock');
-// const mockApi = require('./mock.json');
+// const mockApi = require('./get_requisition_listings.json');
 
 const transport = nodemailer.createTransport({
   host: conf.smtp_host,

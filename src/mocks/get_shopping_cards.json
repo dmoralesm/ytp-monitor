@@ -1,0 +1,23 @@
+[
+  {
+      "id": 2050320,
+      "amount": "200.0",
+      "status": "added",
+      "user_id": 875333,
+      "requisition_id": 1138338,
+      "created_at": "2020-06-09T14:12:06.975-05:00",
+      "updated_at": "2020-06-09T14:12:06.975-05:00",
+      "qualification": "C3",
+      "zell_app_id": 1326606,
+      "origin": "front_end",
+      "requisition": {
+          "destination": "Otros",
+          "approved_amount": "10000.0",
+          "remaining_amount": "4100.0",
+          "rate": "26.9",
+          "term": 12
+      },
+      "already_borrowed?": false,
+      "interest_won": "30.32"
+  }
+]

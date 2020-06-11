@@ -1,0 +1,80 @@
+{
+  "requisitions": [
+      {
+          "id": 1131352,
+          "zell_app_id": "1319125",
+          "qualification": "B4",
+          "rate": "18.9",
+          "destination": "Pagar Deudas",
+          "term": 36,
+          "approved_amount": "300000.0",
+          "loan_detail": {
+              "missing_amount": "33900.00",
+              "days_to_end": "25"
+          },
+          "funded_amount": "200.0",
+          "hidden": false,
+          "credit_report": {
+              "score": 707,
+              "history_antiquity": 8
+          }
+      },
+      {
+          "id": 1138164,
+          "zell_app_id": "1326426",
+          "qualification": "B5",
+          "rate": "19.9",
+          "destination": "Pagar Deudas",
+          "term": 36,
+          "approved_amount": "70000.0",
+          "loan_detail": {
+              "missing_amount": "100.00",
+              "days_to_end": "25"
+          },
+          "funded_amount": 0,
+          "hidden": false,
+          "credit_report": {
+              "score": 693,
+              "history_antiquity": 2
+          }
+      },
+      {
+          "id": 1138338,
+          "zell_app_id": "1326606",
+          "qualification": "C3",
+          "rate": "26.9",
+          "destination": "Otros",
+          "term": 12,
+          "approved_amount": "10000.0",
+          "loan_detail": {
+              "missing_amount": "100.00",
+              "days_to_end": "25"
+          },
+          "funded_amount": "200.0",
+          "hidden": false,
+          "credit_report": {
+              "score": 712,
+              "history_antiquity": 2
+          }
+      },
+      {
+          "id": 1127563,
+          "zell_app_id": "1314989",
+          "qualification": "B6",
+          "rate": "20.9",
+          "destination": "Otros",
+          "term": 30,
+          "approved_amount": "50000.0",
+          "loan_detail": {
+              "missing_amount": "19900.00",
+              "days_to_end": "25"
+          },
+          "funded_amount": 0,
+          "hidden": false,
+          "credit_report": {
+              "score": 722,
+              "history_antiquity": 4
+          }
+      }
+  ]
+}
