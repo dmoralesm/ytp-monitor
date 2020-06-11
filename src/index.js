@@ -24,7 +24,7 @@ const transport = nodemailer.createTransport({
 const message = {
   from: `"YTP monitor" <${conf.smtp_user}>`,
   bcc: conf.to_email,
-  subject: 'New loan requisitions',
+  subject: 'New loan requisitions (TEST)',
   text: ''
 };
 
