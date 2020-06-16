@@ -6,7 +6,7 @@ const fs = require('fs');
 
 const conf = require('./conf.json');
 const { BASE_URL, SIGN_IN, REQ_LISTING, NOT_LOGGED, MIN_LOAN } = require('./constants');
-const { formatNumber } = require('./helpers');
+const { formatNumber, shortText } = require('./helpers');
 const STORE_FILE = 'src/storage.json';
 
 // const mock = require('./mock');
@@ -59,7 +59,7 @@ const createTable = (reqs) => {
     <tr>
       <td>${req.id}</td>
       <td>${req.qualification}</td>
-      <td>${req.destination}</td>
+      <td>${shortText(req.destination)}</td>
       <td>${req.rate}%</td>
       <td>$${formatNumber(req.amount)}</td>
       <td>${req.term}</td>
