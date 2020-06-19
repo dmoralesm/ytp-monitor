@@ -6,7 +6,7 @@ const fs = require('fs');
 
 const conf = require('./conf.json');
 const { BASE_URL, SIGN_IN, REQ_LISTING, NOT_LOGGED, MIN_LOAN } = require('./constants');
-const { formatNumber } = require('./helpers');
+const { formatNumber, shortText } = require('./helpers');
 const STORE_FILE = 'src/storage.json';
 
 // const mock = require('./mock');
@@ -46,6 +46,7 @@ const createTable = (reqs) => {
     <tr>
       <th>Id</th>
       <th>Qual.</th>
+      <th>Destination</th>
       <th>Rate</th>
       <th>Amount</th>
       <th>Term</th>
@@ -58,6 +59,7 @@ const createTable = (reqs) => {
     <tr>
       <td>${req.id}</td>
       <td>${req.qualification}</td>
+      <td>${shortText(req.destination)}</td>
       <td>${req.rate}%</td>
       <td>$${formatNumber(req.amount)}</td>
       <td>${req.term}</td>
@@ -126,13 +128,15 @@ const checkYtp = async () => {
       const remain = requisiton.loan_detail.missing_amount;
       const id = requisiton.id;
       const qualification = requisiton.qualification;
+      const destination = requisiton.destination;
       const rate = requisiton.rate;
       const amount = requisiton.approved_amount;
       const term = requisiton.term;
 
+
       const progress = Math.floor(100 - (remain / amount * 100));
       const isNew = !(prevReqsHistory[id]);
-      const reqObj = { id, qualification, rate, amount, term, remain, progress };
+      const reqObj = { id, qualification, destination, rate, amount, term, remain, progress };
 
       if (isNew) {
         newReqsHistory[id] = reqObj;
