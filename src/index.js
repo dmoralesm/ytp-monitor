@@ -118,7 +118,7 @@ const checkYtp = async () => {
       }
     });
 
-    const requisitionNodes = requisitionsListRequest.data.requisitions;
+    const requisitionNodes = requisitionsListRequest.data.requisitions || [];
     // const requisitionNodes = mockApi.requisitions;
 
     const activeRequisitions = [];
