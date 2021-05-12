@@ -13,7 +13,7 @@
     "axios": "^0.19.2",
     "fs": "0.0.1-security",
     "node-cron": "^2.0.3",
-    "nodemailer": "^6.4.4",
+    "nodemailer": "^6.4.16",
     "querystring": "^0.2.0"
   }
 }
